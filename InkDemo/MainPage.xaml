@@ -1,0 +1,211 @@
+﻿<!--
+//*********************************************************
+//
+// Copyright (c) Microsoft. All rights reserved.
+//
+//*********************************************************
+-->
+<Page
+x:Class="InkDemo.MainPage"
+xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+xmlns:local="using:InkDemo"
+xmlns:common="using:InkDemo.Common"
+xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+xmlns:interop="using:Windows.UI.Xaml.Interop"
+xmlns:model="using:InkDemo.Model"
+
+mc:Ignorable="d">
+    
+    <Page.Resources>
+        <local:ReverseBooleanConverter x:Key="PaletteIsEnabledConverter" />
+        <local:VisibilityConverter x:Key="VisibilityConverter"/>
+        <local:DatabindingDebugConverter x:Key="DiagConverter"/>
+        <!-- Templates and Styles for notations -->
+        
+        <DataTemplate x:Key="GClef">
+                <TextBlock  
+                FontFamily="Assets/Bravura.otf#Bravura"
+                Typography.ContextualLigatures="True"
+                Typography.DiscretionaryLigatures="True"
+                Typography.HistoricalLigatures="True"
+                Typography.StandardLigatures="True"
+                       Text="&#xE050;"
+                FontSize="128"/>
+        </DataTemplate>
+        <!-- this style isn't working. Currently set by code in NotesItemsControl -->
+        <Style x:Key="GClefStyle" TargetType="ContentPresenter">
+            <Setter Property="Canvas.Left" Value="{Binding X}" />
+            <Setter Property="Canvas.Top" Value="{Binding Y}" />
+        </Style>
+
+        <Style x:Key="TextResultStyle" TargetType="ContentPresenter">
+            <Setter Property="Canvas.Left" Value="{Binding X}" />
+            <Setter Property="Canvas.Top" Value="{Binding Y}" />
+        </Style>
+        <Style x:Key="StaffLineStyle" TargetType="ContentPresenter">
+            <!-- Blank -->
+        </Style>
+        
+        <DataTemplate x:Key="Rest">
+            <TextBlock  
+                FontFamily="Assets/Bravura.otf#Bravura"
+                Typography.ContextualLigatures="True"
+                Typography.DiscretionaryLigatures="True"
+                Typography.HistoricalLigatures="True"
+                Typography.StandardLigatures="True"
+                       Text="&#xE050;"
+                FontSize="128"/>
+        </DataTemplate>
+        <DataTemplate x:Key="Note">
+            <TextBlock  
+                FontFamily="Assets/Bravura.otf#Bravura"
+                Typography.ContextualLigatures="True"
+                Typography.DiscretionaryLigatures="True"
+                Typography.HistoricalLigatures="True"
+                Typography.StandardLigatures="True"
+                       Text="&#xE0A4;"
+                FontSize="128"/>
+        </DataTemplate>
+        <DataTemplate x:Key="StaffLine">
+            <Line X1="{Binding Path=Item1}" Y1="{Binding Path=Item2}" 
+                X2="{Binding Path=Item3}" Y2="{Binding Path=Item4}" 
+                  Stroke="Black"></Line>
+        </DataTemplate>
+        <DataTemplate x:Key="TextResult">
+            <TextBlock Text="{Binding Path=Text}"
+                       FontSize="48"
+                       FontFamily="Segue"></TextBlock>
+                
+        </DataTemplate>
+        <common:NotationSelector  x:Key="notations" 
+                                  NoteTemplate="{StaticResource Note}" 
+                                  RestTemplate="{StaticResource Rest}"
+                                  StaffTemplate="{StaticResource StaffLine}"
+                                  GClefTemplate="{StaticResource GClef}"
+                                  TextTemplate="{StaticResource TextResult}"/>
+        
+        <common:NotationStyleSelector x:Key="NotationStyleSelector"
+                                      GClefTemplate="{StaticResource GClefStyle}"
+                                      StaffTemplate="{StaticResource StaffLineStyle}"
+                                      TextTemplate="{StaticResource TextResultStyle}"/>
+                                  
+                                  
+    </Page.Resources>
+
+    <Grid x:Name="Output" Background="{StaticResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="140"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Button Panel -->
+        <StackPanel Grid.Column="0"  x:Name="ResourcesPanel" Orientation="Vertical" 
+                    HorizontalAlignment="Center" VerticalAlignment="Center" >
+            <ToggleButton ToolTipService.ToolTip="Eraser" x:Name="EraserButton" IsChecked="{Binding BrushIsEraser, Mode=TwoWay}" Margin="0,0,10,0">
+                <TextBlock Margin="5,0,0,8" FontFamily="Segoe UI Symbol" Text="&#x2710;" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" />
+            </ToggleButton>
+            <ToggleButton ToolTipService.ToolTip="Display Text" x:Name="DisplayTextButton" IsChecked="{Binding DisplayText, Mode=TwoWay}" Margin="0,0,10,0">
+                <TextBlock Margin="5,0,0,8" FontFamily="Segoe UI Symbol" Text="A" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" />
+            </ToggleButton>
+
+            <local:PaletteControl />
+            <ToggleButton ToolTipService.ToolTip="Display Text" x:Name="DebugButton" IsChecked="{Binding DebugFlag, Mode=TwoWay}" Margin="0,0,10,0">
+                <TextBlock Margin="5,0,0,8" FontFamily="Segoe UI Symbol" Text="&#xe15e;" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" />
+            </ToggleButton>
+            <Button ToolTipService.ToolTip="Clear" x:Name="ClearButton" 
+                    Click="ClearButton_OnClick" BorderThickness="2" BorderBrush="Black" Background="Transparent" Margin="0,0,10,0">
+                <TextBlock Margin="5,0,0,8" FontFamily="Segoe UI Symbol" Text="&#xe106;" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" />
+            </Button>
+            <Button ToolTipService.ToolTip="Clear" x:Name="ReplayButton" 
+                    Click="ReplayButton_OnClickButton_OnClick" BorderThickness="2" BorderBrush="Black" Background="Transparent" Margin="0,0,10,0">
+                <TextBlock Margin="5,0,0,8" FontFamily="Segoe UI Symbol" Text="&#xe102;" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" />
+            </Button>
+  
+        </StackPanel>
+
+        <!-- Sheet Music Page View -->
+        <FlipView x:Name="DrawingsView" Grid.Column="1" SelectionChanged="DrawingsView_OnSelectionChanged" FontFamily="Global User Interface">
+            <FlipView.ItemTemplate >
+                <DataTemplate>
+                    <ScrollViewer ZoomMode="Enabled" 
+                                  MaxZoomFactor="20" 
+                                  HorizontalScrollMode="Enabled" 
+                                  HorizontalScrollBarVisibility="Visible" >
+                        <StackPanel>
+                            <Grid x:Name="containerGrid" >
+
+                                <!-- Stafflines and Clefs -->
+                                <common:SheetMusicItemsControl ItemsSource="{Binding SheetMusic.BackgroundObjects}"
+                                              ItemTemplateSelector="{StaticResource notations}"
+                                              ItemContainerStyleSelector="{StaticResource NotationStyleSelector}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <Canvas/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </common:SheetMusicItemsControl>
+                                
+                                <!-- Recognized Text -->
+                                <common:SheetMusicItemsControl ItemsSource="{Binding SheetMusic.RecognizedText}"
+                                              ItemTemplateSelector="{StaticResource notations}"
+                                              ItemContainerStyleSelector="{StaticResource NotationStyleSelector}"  
+                                              Opacity="{Binding Path=IsChecked, ElementName=DisplayTextButton, 
+                                                    Converter={StaticResource VisibilityConverter}}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <Canvas/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </common:SheetMusicItemsControl>
+
+                                <!-- Inking Canvas -->
+                                <Border BorderThickness="1" BorderBrush="Black" x:Name="DrawingPanelBorder" 
+                                        Grid.Row="0" Grid.Column="0">
+                                    <ItemsControl x:Name="InkCanvas"
+                                             ItemsSource="{Binding SheetMusic.InkStrokeSegments}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                    <Canvas x:Name="InkPanel" 
+                                                    Height="3300" 
+                                                    Width="2400"
+                                                    IsTapEnabled="True"
+                                                    Background="Transparent"
+                                                    PointerPressed="InkPanel_OnPointerPressed"
+                                                    PointerMoved="InkPanel_OnPointerMoved"
+                                                    PointerReleased="InkPanel_OnPointerReleased"
+                                                    PointerExited="InkPanel_OnPointerReleased"
+                                                     />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                                </Border>
+                                
+
+                                
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </DataTemplate>
+            </FlipView.ItemTemplate>
+        </FlipView>
+
+        <!-- Add Storyboards to the visual states below as necessary for supporting the various layouts for the output section -->
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="OutputFullScreenLandscape"/>
+                <VisualState x:Name="OutputFilled"/>
+                <VisualState x:Name="OutputFullScreenPortrait"/>
+                <VisualState x:Name="OutputSnapped"/>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+    </Grid>
+
+
+
+
+</Page>
