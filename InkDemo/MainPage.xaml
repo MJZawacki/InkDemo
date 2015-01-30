@@ -163,28 +163,7 @@ mc:Ignorable="d">
                                     </ItemsControl.ItemsPanel>
                                 </common:SheetMusicItemsControl>
 
-                                <!-- Inking Canvas -->
-                                <Border BorderThickness="1" BorderBrush="Black" x:Name="DrawingPanelBorder" 
-                                        Grid.Row="0" Grid.Column="0">
-                                    <ItemsControl x:Name="InkCanvas"
-                                             ItemsSource="{Binding SheetMusic.InkStrokeSegments}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                    <Canvas x:Name="InkPanel" 
-                                                    Height="3300" 
-                                                    Width="2400"
-                                                    IsTapEnabled="True"
-                                                    Background="Transparent"
-                                                    PointerPressed="InkPanel_OnPointerPressed"
-                                                    PointerMoved="InkPanel_OnPointerMoved"
-                                                    PointerReleased="InkPanel_OnPointerReleased"
-                                                    PointerExited="InkPanel_OnPointerReleased"
-                                                     />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                </ItemsControl>
-                                </Border>
-                                
+
 
                                 
                             </Grid>
